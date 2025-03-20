@@ -62,7 +62,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void openAddDialog(BuildContext context, String? id, {String? name, String? category, String? price, String? imageURL}) {
+  void _showDeleteConfirmationDialog(BuildContext context, String docId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Xác nhận xóa"),
+          content: const Text("Bạn có chắc chắn muốn xóa sản phẩm này không?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng hộp thoại
+              },
+              child: const Text("Hủy"),
+            ),
+            TextButton(
+              onPressed: () {
+                firestoreService.removeProduct(docId); // Xóa sản phẩm
+                Navigator.of(context).pop(); // Đóng hộp thoại
+              },
+              child: const Text("Xóa", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void openDialog(
+    BuildContext context,
+    String? id, {
+    String? name,
+    String? category,
+    String? price,
+    String? imageURL,
+  }) {
     nameController.text = name ?? '';
     categoryController.text = category ?? '';
     priceController.text = price ?? '';
@@ -70,107 +104,120 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(builder: (context, setDialogState){
-          return AlertDialog(
-          title: Text(id != null ? 'Thêm sản phẩm mới' : 'Cập nhật sản phẩm'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Tên sản phẩm
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(hintText: 'Tên sản phẩm'),
-                ),
-                const SizedBox(height: 10),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(
+                id != null ? 'Cập nhật sản phẩm mới' : 'Thêm sản phẩm',
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Tên sản phẩm
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Tên sản phẩm',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
 
-                // Loại sản phẩm
-                TextField(
-                  controller: categoryController,
-                  decoration: const InputDecoration(hintText: 'Loại sản phẩm'),
-                ),
-                const SizedBox(height: 10),
+                    // Loại sản phẩm
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(
+                        hintText: 'Loại sản phẩm',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
 
-                // Gía sản phẩm
-                TextField(
-                  controller: priceController,
-                  keyboardType:
-                      TextInputType.number, // Chỉ hiển thị bàn phím số
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ], // Chỉ cho phép nhập số
-                  decoration: const InputDecoration(hintText: 'Giá sản phẩm'),
-                ),
+                    // Gía sản phẩm
+                    TextField(
+                      controller: priceController,
+                      keyboardType:
+                          TextInputType.number, // Chỉ hiển thị bàn phím số
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ], // Chỉ cho phép nhập số
+                      decoration: const InputDecoration(
+                        hintText: 'Giá sản phẩm',
+                      ),
+                    ),
 
-                const SizedBox(height: 10),
-                // Nút để tải lên hình ảnh
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                  ),
-                  onPressed: () async {
-                    await _pickImage();
-                    setDialogState(() {}); // Cập nhật UI của hộp thoại
+                    const SizedBox(height: 20),
+                    // Nút để tải lên hình ảnh
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                      onPressed: () async {
+                        await _pickImage();
+                        setDialogState(() {}); // Cập nhật UI của hộp thoại
+                      },
+                      child: const Text(
+                        'Tải lên hình ảnh',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Hiển thị hình ảnh đã chọn (nếu có)
+                    if (_image != null)
+                      Image.file(
+                        _image!,
+                        height: 120,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      )
+                    else if (_imageURL != null)
+                      Image.network(
+                        _imageURL!,
+                        height: 120,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
-                  child: const Text('Tải lên hình ảnh', style: TextStyle(color: Colors.white)),
+                  child: const Text('Hủy'),
                 ),
-                const SizedBox(height: 10),
-                // Hiển thị hình ảnh đã chọn (nếu có)
-                if (_image != null)
-                  Image.file(
-                  _image!,
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                )
-                else if (_imageURL != null)
-                  Image.network(
-                    _imageURL!,
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.cover,
-                  ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (id == null) {
-                  firestoreService.add(
-                    nameController.text,
-                    categoryController.text,
-                    priceController.text,
-                    _imageURL!,
-                  );
-                } else {
-                  firestoreService.updateProduct(
-                    id,
-                    nameController.text,
-                    categoryController.text,
-                    priceController.text,
-                    _imageURL!,
-                  );
-                }
+                ElevatedButton(
+                  onPressed: () {
+                    if (id == null) {
+                      firestoreService.add(
+                        nameController.text,
+                        categoryController.text,
+                        priceController.text,
+                        _imageURL!,
+                      );
+                    } else {
+                      firestoreService.updateProduct(
+                        id,
+                        nameController.text,
+                        categoryController.text,
+                        priceController.text,
+                        _imageURL!,
+                      );
+                    }
 
-                nameController.clear();
-                categoryController.clear();
-                priceController.clear();
-                _image = null;
-                _imageURL = null;
-                Navigator.of(context).pop();
-              },
-              child: Text(id != null ? 'Cập nhật' : 'Thêm'),
-            ),
-          ],
+                    nameController.clear();
+                    categoryController.clear();
+                    priceController.clear();
+                    _image = null;
+                    _imageURL = null;
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(id != null ? 'Cập nhật' : 'Thêm'),
+                ),
+              ],
+            );
+          },
         );
-        });
       },
     );
   }
@@ -195,31 +242,59 @@ class _HomeScreenState extends State<HomeScreen> {
                 String category = data['category'];
                 String price = data['price'];
                 String imageURL = data['imageURL'];
-                return ListTile(
-                  leading: Image.network(imageURL),
-                  title: Text(name,style: Theme.of(context).textTheme.titleMedium!),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Loại: $category', style: Theme.of(context).textTheme.titleSmall!.apply(color: Colors.grey)),
-                      const SizedBox(height: 5),
-                      Text('Giá: $price Đồng', style: Theme.of(context).textTheme.titleSmall!.apply(color: Colors.red)),
-                    ],
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () => openAddDialog(context, docId, name: name, category: category, price: price, imageURL: imageURL),
-                        icon: const Icon(Icons.settings),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          firestoreService.removeProduct(docId);
-                        },
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ],
+                  margin: const EdgeInsets.all(10),
+                  elevation: 5,
+                  child: ListTile(
+                    leading: Image.network(imageURL),
+                    title: Text(
+                      name,
+                      style: Theme.of(context).textTheme.titleMedium!,
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Loại: $category',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall!.apply(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Giá: $price Đồng',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall!.apply(color: Colors.red),
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed:
+                              () => openDialog(
+                                context,
+                                docId,
+                                name: name,
+                                category: category,
+                                price: price,
+                                imageURL: imageURL,
+                              ),
+                          icon: const Icon(Icons.settings),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(context, docId);
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -230,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          openAddDialog(context, null);
+          openDialog(context, null);
         },
         child: const Icon(Icons.add),
       ),

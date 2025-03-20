@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:giua_ky/firebase_options.dart';
-import 'package:giua_ky/presentation/screens/home/home_screen.dart';
 import 'package:giua_ky/presentation/screens/login/login.dart';
 
 

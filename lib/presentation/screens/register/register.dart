@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giua_ky/controller/auth_controller.dart';
 import 'package:giua_ky/presentation/screens/login/login.dart';
-import 'package:http/http.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
