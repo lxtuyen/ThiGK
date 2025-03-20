@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "524518799350",
+    "firebase_url": "https://thigk-bcde1-default-rtdb.firebaseio.com",
+    "project_id": "thigk-bcde1",
+    "storage_bucket": "thigk-bcde1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524518799350:android:511b8e94c867712ffb39d7",
+        "android_client_info": {
+          "package_name": "com.example.giua_ky"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIlsDdtowLH-lBsO_Af9s-QsTdReB5qjE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524518799350:android:30c7201b7f5c6687fb39d7",
+        "android_client_info": {
+          "package_name": "com.example.thi_gk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIlsDdtowLH-lBsO_Af9s-QsTdReB5qjE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
