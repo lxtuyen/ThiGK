@@ -238,10 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 DocumentSnapshot doc = productsList[index];
                 String docId = doc.id;
                 Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                String name = data['name'];
-                String category = data['category'];
-                String price = data['price'];
-                String imageURL = data['imageURL'];
+                String name = data['tensp'];
+                String category = data['loaisp'];
+                String price = data['gia'];
+                String imageURL = data['hinhanh'];
                 return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

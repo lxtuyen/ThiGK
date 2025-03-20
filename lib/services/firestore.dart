@@ -2,16 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
 
-  // Get all products from a collection
+  // Get collection
   final CollectionReference products = FirebaseFirestore.instance.collection('products');
   
   // create
   Future<void> add(String name, String category, String price, String imageURL) {
     return products.add({
-      'name': name,
-      'category': category,
-      'price': price,
-      'imageURL': imageURL,
+      'tensp': name,
+      'loaisp': category,
+      'gia': price,
+      'hinhanh': imageURL,
       'timestamp': Timestamp.now(),
     });
   }
@@ -26,10 +26,10 @@ class FirestoreService {
   // update
   Future<void> updateProduct(String id, String name, String category, String price,String imageURL) {
     return products.doc(id).update({
-      'name': name,
-      'category': category,
-      'price': price,
-      'imageURL': imageURL,
+      'tensp': name,
+      'loaisp': category,
+      'gia': price,
+      'hinhanh': imageURL,
     });
   }
 
