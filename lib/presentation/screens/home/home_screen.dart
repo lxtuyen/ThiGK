@@ -1,8 +1,8 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:giua_ky/presentation/screens/home/widgets/listview.dart';
 import 'package:giua_ky/services/firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -20,6 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+  bool isPriceDescending = true;
+  String searchQuery = '';
 
   File? _image;
   String? _imageURL;
@@ -225,84 +228,83 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Danh sách sản phẩm')),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: firestoreService.getProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List productsList = snapshot.data!.docs;
-
-            return ListView.builder(
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot doc = productsList[index];
-                String docId = doc.id;
-                Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                String name = data['tensp'];
-                String category = data['loaisp'];
-                String price = data['gia'];
-                String imageURL = data['hinhanh'];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.all(10),
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Image.network(imageURL),
-                    title: Text(
-                      name,
-                      style: Theme.of(context).textTheme.titleMedium!,
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Loại: $category',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall!.apply(color: Colors.grey),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Giá: $price Đồng',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall!.apply(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed:
-                              () => openDialog(
-                                context,
-                                docId,
-                                name: name,
-                                category: category,
-                                price: price,
-                                imageURL: imageURL,
-                              ),
-                          icon: const Icon(Icons.settings),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            _showDeleteConfirmationDialog(context, docId);
-                          },
-                          icon: const Icon(Icons.delete),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 7,
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm sản phẩm...',
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value; // ✅ Lưu lại giá trị tìm kiếm
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: IconButton(
+                icon: Icon(Icons.filter_alt),
+                onPressed: () {
+                  setState(() {
+                    isPriceDescending = !isPriceDescending;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
       ),
+      body: StreamBuilder<QuerySnapshot>(
+  stream: firestoreService.getProducts(
+    name: searchController.text,
+    isPriceDescending: isPriceDescending,
+  ),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Center(child: Text("Không tìm thấy sản phẩm nào."));
+    }
+
+    List<DocumentSnapshot> productsList = snapshot.data!.docs;
+
+    return ListView.builder(
+      itemCount: productsList.length,
+      itemBuilder: (context, index) {
+        DocumentSnapshot doc = productsList[index];
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        return ListviewCustom(
+          name: data['tensp'],
+          category: data['loaisp'],
+          price: data['gia'],
+          imageURL: data['hinhanh'],
+          id: doc.id,
+          onDelete: () => _showDeleteConfirmationDialog(context, doc.id),
+          onEdit: () => openDialog(
+            context,
+            doc.id,
+            name: data['tensp'],
+            category: data['loaisp'],
+            price: data['gia'],
+            imageURL: data['hinhanh'],
+          ),
+        );
+      },
+    );
+  },
+),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           openDialog(context, null);
