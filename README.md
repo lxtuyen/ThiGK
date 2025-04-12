@@ -1,3 +1,3 @@
 # giua_ky
 
-A new Flutter project.
+Bài thi giữa kỳ môn Phát triển ứng dụng di động đa nền tảng
